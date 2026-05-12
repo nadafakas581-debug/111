@@ -1,0 +1,49 @@
+from django.db import models
+
+class Course(models.Model):
+    course_name = models.CharField(max_length=200)
+    course_code = models.CharField(max_length=20, unique=True)
+
+    def __str__(self):
+        return self.course_name
+
+class Question(models.Model):
+    # Requirement: ForeignKey to Course
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='questions')
+    question_text = models.CharField(max_length=200)
+    pub_date = models.DateTimeField('date published')
+
+    def __str__(self):
+        return self.question_text
+
+    # Requirement: is_get_score() method
+    def is_get_score(self):
+        # Returns True if the question is graded
+        return True
+
+class Choice(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='choices')
+    choice_text = models.CharField(max_length=200)
+    # Requirement: is_correct BooleanField
+    is_correct = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.choice_text
+
+class Enrollment(models.Model):
+    # Requirement: Needed for the Submission model to link to
+    date_enrolled = models.DateTimeField(auto_now_add=True)
+    # Add other fields (e.g., student) if your assignment specified them
+
+    def __str__(self):
+        return f"Enrollment {self.id}"
+
+class Submission(models.Model):
+    # Requirement: ForeignKey to Enrollment
+    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE)
+    # Requirement: ManyToManyField to Choice
+    choices = models.ManyToManyField(Choice)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Submission {self.id}"
